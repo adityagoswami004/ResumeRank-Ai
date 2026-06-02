@@ -1,4 +1,4 @@
-# Resume-Ranker-AI
+# Resume-Rank-AI
 
 A modern AI-powered Resume Ranking and Screening System built with React and Flask. The platform helps recruiters efficiently analyze resumes, match candidates against job descriptions, rank applicants based on relevance, and visualize recruitment insights through an interactive dashboard.
 
@@ -7,7 +7,7 @@ A modern AI-powered Resume Ranking and Screening System built with React and Fla
 ## Project Structure
 
 ```text
-Resume-Ranker-AI/
+Resume-Rank-AI/
 ├── frontend/                     # React + Vite Frontend
 │   ├── src/
 │   │   ├── components/           # Reusable UI Components
@@ -109,8 +109,8 @@ Resume-Ranker-AI/
 ### Clone Repository
 
 ```bash
-git clone https://github.com/adityagoswami004/Resume-Ranker-AI.git
-cd Resume-Ranker-AI
+git clone https://github.com/adityagoswami004/Resume-Rank-AI.git
+cd Resume-Rank-AI
 ```
 
 ### Backend Setup
