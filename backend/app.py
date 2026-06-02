@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from parser_engine import extract_text_from_file, process_resume
+from parser_engine import analyze_resume 
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -99,15 +99,10 @@ def parse_resume():
     file_path = os.path.join(UPLOAD_FOLDER, saved_name)
     file.save(file_path)
 
-    extracted_text = extract_text_from_file(file_path)
-    if not extracted_text:
-        return jsonify({
-            "success": False,
-            "message": "Could not extract text"
-        }), 500
-
-    processed = process_resume(extracted_text, job_description) or {}
-
+    result = analyze_resume( file_path, job_description ) 
+    if not result["success"]: 
+        return jsonify(result), 500 
+    processed = result["data"]
     name = processed.get("name", "N/A")
     email = processed.get("email", "N/A")
     phone = processed.get("phone", "N/A")
@@ -132,7 +127,8 @@ def parse_resume():
         "date": datetime.now().strftime("%d %b %Y"),
         "rank": get_candidate_rank(score_value),
     }
-
+    print("Candidate:", name)
+    print("Matched Skills:", processed.get("job_matching", {}).get("required_skills_found"))
     candidate_store.append(candidate)
 
     return jsonify({

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
@@ -10,7 +10,7 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
-function AppRoutes() {
+function AppRoutes({ jobDescription, setJobDescription }) {
   const { user } = useAuth();
 
   return (
@@ -27,7 +27,10 @@ function AppRoutes() {
         path="/"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <DashboardPage
+              jobDescription={jobDescription}
+              setJobDescription={setJobDescription}
+            />
           </ProtectedRoute>
         }
       />
@@ -36,10 +39,15 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const [jobDescription, setJobDescription] = useState(null);
+
   return (
     <AuthProvider>
       <BrowserRouter>
-        <AppRoutes />
+        <AppRoutes
+          jobDescription={jobDescription}
+          setJobDescription={setJobDescription}
+        />
       </BrowserRouter>
     </AuthProvider>
   );

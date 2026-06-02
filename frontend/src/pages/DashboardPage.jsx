@@ -97,7 +97,10 @@ function StatusPill({ status }) {
   );
 }
 
-export default function DashboardPage() {
+export default function DashboardPage({
+   jobDescription,
+   setJobDescription
+}) {
   const { logout } = useAuth();
 
   const [summary, setSummary] = useState({
@@ -136,15 +139,18 @@ export default function DashboardPage() {
     };
 
     const fetchCandidates = async () => {
-      try {
-        const res = await fetch("http://127.0.0.1:5000/api/candidates");
-        const data = await res.json();
-        if (!mounted) return;
-        setCandidates(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.log("Candidates fetch error:", err);
-      }
-    };
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/candidates");
+    const data = await res.json();
+
+    console.log("ALL CANDIDATES =", data);
+
+    if (!mounted) return;
+    setCandidates(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.log("Candidates fetch error:", err);
+  }
+};
 
     fetchSummary();
     fetchCandidates();
@@ -286,6 +292,14 @@ export default function DashboardPage() {
   const recentCandidates = useMemo(() => {
     return [...candidates].slice(-4).reverse();
   }, [candidates]);
+
+  const topSkills = useMemo(() => {
+  if (!candidates.length) return [];
+
+  const latestCandidate = candidates[candidates.length - 1];
+
+  return latestCandidate.job_matching?.required_skills_found || [];
+}, [candidates]);
 
   const alerts = [
     "New resumes are being processed live.",
@@ -515,7 +529,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <ResumeUpload />
+                <ResumeUpload jobDescription={jobDescription} />
                 </div>
 
                 <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-2xl p-6 shadow-xl shadow-black/20">
@@ -580,19 +594,16 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="flex flex-wrap gap-3">
-                        {["Python", "React", "Flask", "SQL", "MongoDB", "AI"].map(
-                          (skill) => (
-                            <span
-                              key={skill}
-                              className="rounded-full bg-indigo-500/20 px-4 py-2 text-sm font-medium text-indigo-200 border border-indigo-400/20"
-                            >
-                              {skill}
-                            </span>
-                          )
-                        )}
-                      </div>
-                    </div>
-
+  {topSkills.map((skill) => (
+    <span
+      key={skill}
+      className="rounded-full bg-indigo-500/20 px-4 py-2 text-sm font-medium text-indigo-200 border border-indigo-400/20"
+    >
+      {skill}
+    </span>
+  ))}
+</div>
+</div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="rounded-3xl bg-black/20 border border-white/10 p-5">
                         <p className="text-sm text-white/40">Resume Status</p>

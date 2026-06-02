@@ -61,7 +61,7 @@ export default function ParsedOutput({ data }) {
   }
 
   const profile = data.candidate_profile || {};
-  const skills = data.skills || [];
+  const skills = data.matched_skills || [];
   const experience = data.experience || [];
   const education = data.education || [];
   const certifications = data.certifications || [];

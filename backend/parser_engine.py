@@ -12,6 +12,7 @@ import fitz  # PyMuPDF
 import spacy
 from docx import Document
 from PIL import Image
+from PIL import ImageEnhance
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 from sentence_transformers import SentenceTransformer, util
@@ -69,8 +70,23 @@ def extract_text_from_file(file_path: str) -> Optional[str]:
 
         elif ext in {"png", "jpg", "jpeg", "tiff", "bmp"}:
             image = Image.open(file_path)
-            text = pytesseract.image_to_string(image)
+            # Convert to grayscale
+            image = image.convert("L")
 
+            # Increase contrast
+            enhancer = ImageEnhance.Contrast(image)
+            image = enhancer.enhance(2)
+
+            # OCR extraction
+            text = pytesseract.image_to_string(
+            image,
+            config="--oem 3 --psm 6"
+            )
+
+            print("\n===== OCR EXTRACTED TEXT =====")
+            print(text)
+            print("=============================\n")
+        
         else:
             print(f"Unsupported file format: .{ext}")
             return None
@@ -290,6 +306,18 @@ skill_hierarchy = {
     "kubernetes": ["kubernetes", "k8s", "devops"],
     "spark": ["spark", "big data", "data engineering"],
     "hadoop": ["hadoop", "big data", "data engineering"],
+    
+    "numpy": ["numpy", "python", "data science"], 
+    "pandas": ["pandas", "python", "data analysis"], 
+    "matplotlib": ["matplotlib", "visualization"], 
+    "seaborn": ["seaborn", "visualization"], 
+    "tableau": ["tableau", "dashboard", "visualization"], 
+    "powerbi": ["powerbi", "dashboard", "visualization"], 
+    "nlp": ["nlp", "natural language processing", "ai"], 
+    "transformers": ["transformers", "huggingface", "nlp"], 
+    "streamlit": ["streamlit", "python"], 
+    "fastapi": ["fastapi", "python", "backend"], 
+    "excel": ["excel", "analysis"],
 }
 
 
@@ -305,7 +333,8 @@ def extract_and_expand_skills(cleaned_text: str) -> List[str]:
         trigger_norm = trigger.lower().strip()
 
         if " " in trigger_norm:
-            matched = trigger_norm in normalized
+            matched = ( trigger_norm in normalized 
+            or trigger_norm.replace(" ", "") in normalized.replace(" ", "") )
         else:
             matched = re.search(rf"\b{re.escape(trigger_norm)}\b", cleaned_text.lower()) is not None
 
@@ -503,6 +532,9 @@ def process_resume(resume_text: str, job_description: str) -> Dict:
     job_skills = extract_and_expand_skills(cleaned_job)
 
     overlap_score, matched_skills = calculate_skill_overlap(resume_skills, job_skills)
+    print("Resume Skills:", resume_skills)
+    print("Job Skills:", job_skills)
+    print("Matched Skills:", matched_skills)
 
     raw_semantic_score = advanced_semantic_match(cleaned_resume, cleaned_job)
     normalized_semantic_score = min(raw_semantic_score * 1.5, 100.0)
@@ -521,6 +553,10 @@ def process_resume(resume_text: str, job_description: str) -> Dict:
         "email": contact.get("email"),
         "phone": contact.get("phone"),
         "skills": resume_skills[:25],
+        
+        "matched_skills": matched_skills, 
+        "missing_skills": list(set(job_skills) - set(matched_skills)),
+        
         "experience": experience,
         "education": education,
         "certifications": certifications,
@@ -542,3 +578,27 @@ def process_resume(resume_text: str, job_description: str) -> Dict:
     }
 
     return parsed_data
+
+def analyze_resume(file_path: str, job_description_text: str):
+
+    raw_resume_text = extract_text_from_file(file_path)
+
+    print("========== EXTRACTED TEXT ==========")
+    print(raw_resume_text)
+    print("====================================")
+
+    if not raw_resume_text:
+        return {
+            "success": False,
+            "message": "Could not extract text from resume"
+        }
+
+    final_json_output = process_resume(
+        raw_resume_text,
+        job_description_text
+    )
+
+    return {
+        "success": True,
+        "data": final_json_output
+    }

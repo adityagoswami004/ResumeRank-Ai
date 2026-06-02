@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
-
 export default function ResumeUpload() {
   const fileInputRef = useRef(null);
 
