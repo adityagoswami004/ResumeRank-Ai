@@ -181,10 +181,4 @@ npm run dev
 
 ---
 
-## Author
 
-**Aditya Goswami**
-
-B.Sc. Computer Science, IIT Patna
-
-GitHub: https://github.com/adityagoswami004
